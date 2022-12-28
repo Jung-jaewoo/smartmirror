@@ -1,7 +1,11 @@
 import cv2
+import sys
 from pathlib import Path
 import time
 from time import sleep
+from os import path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+import union
 pose_type = "SmartMirror"
 
 # MPII에서 각 파트 번호, 선으로 연결될 POSE_PAIRS
@@ -143,120 +147,120 @@ def show_result(pose_type): #END/Again
     else:
         print("자세를 취해주세요.") 
         return "Again"
-        
+
+
 def check_up(points):
     lu = check_left_up(points)
     ru = check_right_up(points)
     ld = check_left_down(points)
     rd = check_right_down(points)
     
-    result = 0
     
+    r = 0
     if lu:
-        result = show_result("l_up")
+        r = show_result("l_up")
         #time.sleep(2)
     if ru:
-        result = show_result("r_up")
+        r = show_result("r_up")
         #time.sleep(2)
     if ld:
-        result = show_result("l_down")
+        r = show_result("l_down")
         #time.sleep(2)
     if rd:
-        result = show_result("r_down")
+        r = show_result("r_down")
         #time.sleep(2)
     
-    return result
+    return r
 
 
+def startCam():
+    ###카메라랑 연결...?
+    capture = cv2.VideoCapture(0) #카메라 정보 받아옴
+    # capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640) #카메라 속성 설정
+    # capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480) # width:너비, height: 높이
+
+    inputWidth=320
+    inputHeight=240
+    inputScale=1.0/255
 
 
-
-###카메라랑 연결...?
-capture = cv2.VideoCapture(0) #카메라 정보 받아옴
-# capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640) #카메라 속성 설정
-# capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480) # width:너비, height: 높이
-
-inputWidth=320
-inputHeight=240
-inputScale=1.0/255
-
-
-#반복문을 통해 카메라에서 프레임을 지속적으로 받아옴
-while cv2.waitKey(1) <0:  #아무 키나 누르면 끝난다.
-    #웹캠으로부터 영상 가져옴
-    hasFrame, frame = capture.read()  
-    
-    #영상이 커서 느리면 사이즈를 줄이자
-    #frame=cv2.resize(frame,dsize=(320,240),interpolation=cv2.INTER_AREA)
-    
-    #웹캠으로부터 영상을 가져올 수 없으면 웹캠 중지
-    if not hasFrame:
-        cv2.waitKey()
-        break
-    
-    # 
-    frameWidth = frame.shape[1]
-    frameHeight = frame.shape[0]
-    
-    inpBlob = cv2.dnn.blobFromImage(frame, inputScale, (inputWidth, inputHeight), (0, 0, 0), swapRB=False, crop=False)
-    
-    imgb=cv2.dnn.imagesFromBlob(inpBlob)
-    #cv2.imshow("motion",(imgb[0]*255.0).astype(np.uint8))
-    
-    # network에 넣어주기
-    net.setInput(inpBlob)
-
-    # 결과 받아오기
-    output = net.forward()
-
-
-    # 키포인트 검출시 이미지에 그려줌
-    points = []
-    for i in range(0,15):
-        # 해당 신체부위 신뢰도 얻음.
-        probMap = output[0, i, :, :]
-    
-        # global 최대값 찾기
-        minVal, prob, minLoc, point = cv2.minMaxLoc(probMap)
-
-        # 원래 이미지에 맞게 점 위치 변경
-        x = (frameWidth * point[0]) / output.shape[3]
-        y = (frameHeight * point[1]) / output.shape[2]
-
-        # 키포인트 검출한 결과가 0.1보다 크면(검출한곳이 위 BODY_PARTS랑 맞는 부위면) points에 추가, 검출했는데 부위가 없으면 None으로    
-        if prob > 0.1 :    
-            cv2.circle(frame, (int(x), int(y)), 3, (0, 255, 255), thickness=-1, lineType=cv2.FILLED) # circle(그릴곳, 원의 중심, 반지름, 색)
-            cv2.putText(frame, "{}".format(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, lineType=cv2.LINE_AA)
-            points.append((int(x), int(y)))
-        else :
-            points.append(None)
-    
-    
-
-    # 각 POSE_PAIRS별로 선 그어줌 (머리 - 목, 목 - 왼쪽어깨, ...)
-    for pair in POSE_PAIRS:
-        partA = pair[0]             # Head
-        partA = BODY_PARTS[partA]   # 0
-        partB = pair[1]             # Neck
-        partB = BODY_PARTS[partB]   # 1
+    #반복문을 통해 카메라에서 프레임을 지속적으로 받아옴
+    while cv2.waitKey(1) <0:  #아무 키나 누르면 끝난다.
+        #웹캠으로부터 영상 가져옴
+        hasFrame, frame = capture.read()  
         
-        #partA와 partB 사이에 선을 그어줌 (cv2.line)
-        if points[partA] and points[partB]:
-            cv2.line(frame, points[partA], points[partB], (0, 255, 0), 2)
-    
-            
-    cv2.imshow("Output-Keypoints",frame)
-    
-    
-    ####################################################################    위는 기본적인 카메라 출력
-    
-    result = check_up(points)
-    #print(result)
-    
-####### result 변수를 UI에 전달하면 어느정도 작동할 듯????
+        #영상이 커서 느리면 사이즈를 줄이자
+        #frame=cv2.resize(frame,dsize=(320,240),interpolation=cv2.INTER_AREA)
+        
+        #웹캠으로부터 영상을 가져올 수 없으면 웹캠 중지
+        if not hasFrame:
+            cv2.waitKey()
+            break
+        
+        # 
+        frameWidth = frame.shape[1]
+        frameHeight = frame.shape[0]
+        
+        inpBlob = cv2.dnn.blobFromImage(frame, inputScale, (inputWidth, inputHeight), (0, 0, 0), swapRB=False, crop=False)
+        
+        imgb=cv2.dnn.imagesFromBlob(inpBlob)
+        #cv2.imshow("motion",(imgb[0]*255.0).astype(np.uint8))
+        
+        # network에 넣어주기
+        net.setInput(inpBlob)
 
-capture.release()  #카메라 장치에서 받아온 메모리 해제
-cv2.destroyAllWindows() #모든 윈도우 창 닫음
+        # 결과 받아오기
+        output = net.forward()
+
+
+        # 키포인트 검출시 이미지에 그려줌
+        points = []
+        for i in range(0,15):
+            # 해당 신체부위 신뢰도 얻음.
+            probMap = output[0, i, :, :]
+        
+            # global 최대값 찾기
+            minVal, prob, minLoc, point = cv2.minMaxLoc(probMap)
+
+            # 원래 이미지에 맞게 점 위치 변경
+            x = (frameWidth * point[0]) / output.shape[3]
+            y = (frameHeight * point[1]) / output.shape[2]
+
+            # 키포인트 검출한 결과가 0.1보다 크면(검출한곳이 위 BODY_PARTS랑 맞는 부위면) points에 추가, 검출했는데 부위가 없으면 None으로    
+            if prob > 0.1 :    
+                cv2.circle(frame, (int(x), int(y)), 3, (0, 255, 255), thickness=-1, lineType=cv2.FILLED) # circle(그릴곳, 원의 중심, 반지름, 색)
+                cv2.putText(frame, "{}".format(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, lineType=cv2.LINE_AA)
+                points.append((int(x), int(y)))
+            else :
+                points.append(None)
+        
+        
+
+        # 각 POSE_PAIRS별로 선 그어줌 (머리 - 목, 목 - 왼쪽어깨, ...)
+        for pair in POSE_PAIRS:
+            partA = pair[0]             # Head
+            partA = BODY_PARTS[partA]   # 0
+            partB = pair[1]             # Neck
+            partB = BODY_PARTS[partB]   # 1
+            
+            #partA와 partB 사이에 선을 그어줌 (cv2.line)
+            if points[partA] and points[partB]:
+                cv2.line(frame, points[partA], points[partB], (0, 255, 0), 2)
+        
+                
+        cv2.imshow("Output-Keypoints",frame)
+        
+    
+        ####################################################################    위는 기본적인 카메라 출력
+        
+        result = check_up(points)
+        print(result)
+
+        union.result1.send(result)
+        ####### result 변수를 UI에 전달하면 어느정도 작동할 듯????
+
+    capture.release()  #카메라 장치에서 받아온 메모리 해제
+    cv2.destroyAllWindows() #모든 윈도우 창 닫음
 
 
 

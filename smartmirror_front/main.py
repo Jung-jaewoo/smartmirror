@@ -69,8 +69,8 @@ class MyWindow(QtWidgets.QMainWindow,UI_class):
     # def button3Function(self):
     #     webbrowser.open('"C:\windows\system32\\charmap.exe"')
 
-    # def button4Function(self):
-    #     webbrowser.open('https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=%EB%84%A4%EC%9D%B4%EB%B2%84+%EB%82%A0%EC%94%A8')
+    def button4Function():
+        webbrowser.open('https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=%EB%84%A4%EC%9D%B4%EB%B2%84+%EB%82%A0%EC%94%A8')
         
 # if __name__=='__main__':
 #     app=QtWidgets.QApplication(sys.argv)
