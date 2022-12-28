@@ -2,13 +2,6 @@ import cv2
 from pathlib import Path
 import time
 from time import sleep
-from PyQt5.QtWidgets import *
-from PyQt5 import QtCore,QtGui,QtWidgets,uic
-import os
-import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
 pose_type = "SmartMirror"
 
 # MPII에서 각 파트 번호, 선으로 연결될 POSE_PAIRS
@@ -33,26 +26,26 @@ net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 # openCV의 좌표계는 좌측위가 (0,0)이다...
 # 아래/오른쪽으로 갈수록 증가한다
 
+
+
+
+
 ##################################################
 # 자세 체크 함수들
 
 def check_right_up(points):
-    max_time_end = time.time() + 5;
     while(True):
-        if time.time() <= max_time_end:
-            if points[0] and points[2] and points[3] and points[4]:
-                head_x,head_y=points[0] #머리
-                rs_x,rs_y=points[2] #오른쪽 어깨
-                re_x,re_y=points[3] #오른쪽 팔꿈치
-                rw_x,rw_y=points[4] #오른쪽 손목
-                
-                #어깨보다 팔꿈치가 위로 & 어깨 오른쪽에 팔꿈치
-                if rs_y < re_y and re_x < rs_x:
-                #머리보다 오른쪽에 손목 & 머리보다 위에 손목
-                    if rw_x < head_x and head_y < rw_y:
-                        return True
-                    else:
-                        return False
+        if points[1] and points[2] and points[3] and points[4]:
+            neck_x,neck_y=points[1] #목
+            rs_x,rs_y=points[2] #오른쪽 어깨
+            re_x,re_y=points[3] #오른쪽 팔꿈치
+            rw_x,rw_y=points[4] #오른쪽 손목
+            
+            #어깨보다 팔꿈치가 위로 & 어깨 오른쪽에 팔꿈치
+            if rs_y > re_y and re_x < rs_x:
+            #목보다 오른쪽에 손목 & 목보다 위에 손목
+                if rw_x < neck_x and neck_y > rw_y:
+                    return True
                 else:
                     return False
             else:
@@ -60,27 +53,19 @@ def check_right_up(points):
         else:
             return False
         
-def check_right_down(points):
-    max_time_end = time.time() + 5;
+def check_left_up(points):
     while(True):
-        if time.time() <= max_time_end:
-            if points[2] and points[3] and points[4] and points[14]:
-                rs_x,rs_y=points[2] #오른쪽 어깨
-                re_x,re_y=points[3] #오른쪽 팔꿈치
-                rw_x,rw_y=points[4] #오른쪽 손목
-                c_x,c_y = points[14] #흉부
-                
-                #흉부보다 손목이 위로 올라감 & 흉부 오른쪽에 손목
-                if c_y < rw_y and rw_x < c_x:
-                    #어깨 아래 팔꿈치 & 어깨 오른쪽 팔꿈치
-                    if re_y < rs_y and re_x < rs_x:
-                        #팔꿈치 아래 손목 & 팔꿈치 오른쪽 손목
-                        if rw_y < re_y and rw_x < re_x:
-                            return True
-                        else:
-                            return False
-                    else:
-                        return False
+        if points[1] and points[5] and points[6] and points[7]:
+            neck_x,neck_y=points[1] #목
+            ls_x,ls_y=points[5] #왼쪽 어깨
+            le_x,le_y=points[6] #왼쪽 팔꿈치
+            lw_x,lw_y=points[7] #왼쪽 손목
+            
+            #어깨보다 팔꿈치가 위로 & 어깨 왼쪽에 팔꿈치
+            if ls_y > le_y and le_x > ls_x:
+            #목보다 왼쪽에 손목 & 머리보다 위에 손목
+                if lw_x > neck_x and neck_y > lw_y:
+                    return True
                 else:
                     return False
             else:
@@ -88,20 +73,21 @@ def check_right_down(points):
         else:
             return False
 
-def check_left_up(points):
-    max_time_end = time.time() + 5;
+        
+def check_right_down(points):
     while(True):
-        if time.time() <= max_time_end:
-            if points[0] and points[5] and points[6] and points[7]:
-                head_x,head_y=points[0] #머리
-                ls_x,ls_y=points[5] #왼쪽 어깨
-                le_x,le_y=points[6] #왼쪽 팔꿈치
-                lw_x,lw_y=points[7] #왼쪽 손목
-                
-                #어깨보다 팔꿈치가 위로 & 어깨 왼쪽에 팔꿈치
-                if ls_y < le_y and le_x > ls_x:
-                #머리보다 왼쪽에 손목 & 머리보다 위에 손목
-                    if lw_x < head_x and head_y < lw_y:
+        if points[2] and points[3] and points[4] and points[14]:
+            rs_x,rs_y=points[2] #오른쪽 어깨
+            re_x,re_y=points[3] #오른쪽 팔꿈치
+            rw_x,rw_y=points[4] #오른쪽 손목
+            c_x,c_y = points[14] #흉부
+            
+            #흉부보다 손목이 위로 올라감 & 흉부 오른쪽에 손목
+            if c_y > rw_y and rw_x < c_x:
+                #어깨 아래 팔꿈치 & 어깨 오른쪽 팔꿈치
+                if re_y > rs_y and re_x < rs_x:
+                    #팔꿈치 아래 손목 & 팔꿈치 오른쪽 손목
+                    if rw_y > re_y and rw_x < re_x:
                         return True
                     else:
                         return False
@@ -113,24 +99,20 @@ def check_left_up(points):
             return False
     
 def check_left_down(points):
-    max_time_end = time.time() + 5;
     while(True):
-        if time.time() <= max_time_end:
-            if points[5] and points[6] and points[7] and points[14]:
-                ls_x,ls_y=points[5] #왼쪽 어깨
-                le_x,le_y=points[6] #왼쪽 팔꿈치
-                lw_x,lw_y=points[7] #왼쪽 손목
-                c_x,c_y = points[14] #흉부
-                
-                #흉부보다 손목이 위로 올라감 & 흉부 왼쪽에 손목
-                if c_y < lw_y and lw_x > c_x:
-                    #어깨 아래 팔꿈치 & 어깨 왼쪽 팔꿈치
-                    if le_y < ls_y and le_x > ls_x:
-                        #팔꿈치 아래 손목 & 팔꿈치 왼쪽 손목
-                        if lw_y < le_y and lw_x > le_x:
-                            return 
-                        else:
-                            return False
+        if points[5] and points[6] and points[7] and points[14]:
+            ls_x,ls_y=points[5] #왼쪽 어깨
+            le_x,le_y=points[6] #왼쪽 팔꿈치
+            lw_x,lw_y=points[7] #왼쪽 손목
+            c_x,c_y = points[14] #흉부
+            
+            #흉부보다 손목이 위로 올라감 & 흉부 왼쪽에 손목
+            if c_y > lw_y and lw_x > c_x:
+                #어깨 아래 팔꿈치 & 어깨 왼쪽 팔꿈치
+                if le_y > ls_y and le_x > ls_x:
+                    #팔꿈치 아래 손목 & 팔꿈치 왼쪽 손목
+                    if lw_y > le_y and lw_x > le_x:
+                        return True
                     else:
                         return False
                 else:
@@ -139,6 +121,7 @@ def check_left_down(points):
                 return False
         else:
             return False
+
 
 
 #################################################
@@ -161,18 +144,41 @@ def show_result(pose_type): #END/Again
         print("자세를 취해주세요.") 
         return "Again"
         
+def check_up(points):
+    lu = check_left_up(points)
+    ru = check_right_up(points)
+    ld = check_left_down(points)
+    rd = check_right_down(points)
+    
+    result = 0
+    
+    if lu:
+        result = show_result("l_up")
+        #time.sleep(2)
+    if ru:
+        result = show_result("r_up")
+        #time.sleep(2)
+    if ld:
+        result = show_result("l_down")
+        #time.sleep(2)
+    if rd:
+        result = show_result("r_down")
+        #time.sleep(2)
+    
+    return result
 
-    #def startLoop():###카메라랑 연결...?
 
 
 
+
+###카메라랑 연결...?
 capture = cv2.VideoCapture(0) #카메라 정보 받아옴
 # capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640) #카메라 속성 설정
 # capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480) # width:너비, height: 높이
 
-inputWidth=320;
-inputHeight=240;
-inputScale=1.0/255;
+inputWidth=320
+inputHeight=240
+inputScale=1.0/255
 
 
 #반복문을 통해 카메라에서 프레임을 지속적으로 받아옴
@@ -244,42 +250,13 @@ while cv2.waitKey(1) <0:  #아무 키나 누르면 끝난다.
     
     ####################################################################    위는 기본적인 카메라 출력
     
-    # app=QtWidgets.QApplication(sys.argv)
-    # mywindow=main.MyWindow()  #MyWindow의 인스턴스 생성    
-    # app.exec()
-
-
-
-    lu = check_left_up(points)
-    ru = check_right_up(points)
-    ld = check_left_down(points)
-    rd = check_right_down(points)
+    result = check_up(points)
+    #print(result)
     
-    if lu:
-        result = show_result("l_up")
-        # mywindow.executeFile(mywindow.exefiles[1])
-        sleep(5)
-    if ru:
-        result = show_result("r_up")
-        # mywindow.executeFile(mywindow.exefiles[0])
-        sleep(5)
-    if ld:
-        result = show_result("l_down")
-        # mywindow.executeFile(mywindow.exefiles[2])
-        sleep(5)
-    if rd:
-        result = show_result("r_down")
-        # mywindow.executeFile(mywindow.exefiles[3])
-        sleep(5)      
-
 ####### result 변수를 UI에 전달하면 어느정도 작동할 듯????
 
 capture.release()  #카메라 장치에서 받아온 메모리 해제
 cv2.destroyAllWindows() #모든 윈도우 창 닫음
-    
-
-
-
 
 
 
