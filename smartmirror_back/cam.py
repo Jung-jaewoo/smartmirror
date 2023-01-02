@@ -32,11 +32,13 @@ net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 # 아래/오른쪽으로 갈수록 증가한다
 
 
-
-
+max_time_end = time.time() + 3
+keep = [0,0,0,0]
 
 ##################################################
 # 자세 체크 함수들
+
+
 
 def check_right_up(points):
     while(True):
@@ -156,22 +158,35 @@ def check_up(points):
     ld = check_left_down(points)
     rd = check_right_down(points)
     
-    
-    r = 0
     if lu:
-        r = show_result("l_up")
-        #time.sleep(2)
+        keep[0] += 1
+        keep[1] = keep[2] = keep[3] = 0
+        if keep[0] > 10:
+            keep[0] = 0
+            return show_result("l_up")
     if ru:
-        r = show_result("r_up")
-        #time.sleep(2)
+        keep[1] += 1
+        keep[0] = keep[2] = keep[3] = 0
+        if keep[1] > 10:
+            keep[1] = 0
+            return show_result("r_up")
+        
     if ld:
-        r = show_result("l_down")
-        #time.sleep(2)
+        keep[2] += 1
+        keep[0] = keep[1] = keep[3] = 0
+        if keep[2] > 10:
+            keep[2] = 0
+            return show_result("l_down")
+        
     if rd:
-        r = show_result("r_down")
-        #time.sleep(2)
+        keep[3] += 1
+        keep[0] = keep[1] = keep[2] = 0
+        if keep[3] > 10:
+            keep[3] = 0
+            return show_result("r_down")
+        
     
-    return r
+    
 
 
     
@@ -261,32 +276,23 @@ def startCam():
         
         result = check_up(points)
         print(result)
+        #print(path)
 
         if result == 'A':
             os.system(file_list_exe[0])
-            sleep(5)
+            sleep(1)
         elif result == 'B':
             os.system(file_list_exe[1])
-            sleep(5)
+            sleep(1)
         elif result == 'C':
             os.system(file_list_exe[2])
-            sleep(5)
+            sleep(1)
         elif result == 'D':
             os.system(file_list_exe[3])
-            sleep(5)
+            sleep(1)
 
             
         ####### result 변수를 UI에 전달하면 어느정도 작동할 듯????
 
     capture.release()  #카메라 장치에서 받아온 메모리 해제
     cv2.destroyAllWindows() #모든 윈도우 창 닫음
-
-
-
-
-
-
-
-
-
-
