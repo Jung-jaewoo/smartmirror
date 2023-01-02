@@ -4,6 +4,7 @@ from pathlib import Path
 import time
 from time import sleep
 from os import path
+import os
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 import union
 pose_type = "SmartMirror"
@@ -173,6 +174,8 @@ def check_up(points):
     return r
 
 
+    
+
 def startCam():
     ###카메라랑 연결...?
     capture = cv2.VideoCapture(0) #카메라 정보 받아옴
@@ -183,6 +186,9 @@ def startCam():
     inputHeight=240
     inputScale=1.0/255
 
+    path = str(BASE_DIR).replace("back","front") + "/exefiles/"
+    file_list = os.listdir(path)
+    file_list_exe = [file for file in file_list if file.endswith(".exe")]        
 
     #반복문을 통해 카메라에서 프레임을 지속적으로 받아옴
     while cv2.waitKey(1) <0:  #아무 키나 누르면 끝난다.
@@ -256,7 +262,20 @@ def startCam():
         result = check_up(points)
         print(result)
 
-        union.result1.send(result)
+        if result == 'A':
+            os.system(file_list_exe[0])
+            sleep(5)
+        elif result == 'B':
+            os.system(file_list_exe[1])
+            sleep(5)
+        elif result == 'C':
+            os.system(file_list_exe[2])
+            sleep(5)
+        elif result == 'D':
+            os.system(file_list_exe[3])
+            sleep(5)
+
+            
         ####### result 변수를 UI에 전달하면 어느정도 작동할 듯????
 
     capture.release()  #카메라 장치에서 받아온 메모리 해제
