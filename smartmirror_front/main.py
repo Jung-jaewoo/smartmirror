@@ -25,7 +25,7 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
 
     def initUI(self,filesIndex):
         self.setWindowTitle("파일 오픈")
-        exefiles = self.importfile(filesIndex)
+        self.exefiles = self.importfile(filesIndex)
         try:
             self.pushButton1.clicked.connect(partial(self.executeFile,exefiles[0]))
             self.pushButton2.clicked.connect(partial(self.executeFile,exefiles[1]))
@@ -62,7 +62,15 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
 
     @pyqtSlot(int)
     def funcEmit(self, value):
-        print(value)
+        self.executeFile(self.exefiles[0])
+        if value == 0:
+            self.executeFile(self.exefiles[0])
+        if value == 1:
+            self.executeFile(self.exefiles[1])
+        if value == 2:
+            self.executeFile(self.exefiles[2])
+        if value == 3:
+            self.executeFile(self.exefiles[3])
     # def fileopen(self):
     #     global filename
     #     filename = QtWidgets.QFileDialog.getOpenFileName(self, '')
