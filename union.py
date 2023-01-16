@@ -5,20 +5,34 @@ import time
 from multiprocessing import Process, Pipe
 from smartmirror_front import main
 import smartmirror_back.cam as cam
+import multiprocessing as mp
+import datetime
 
-def mainthread(procnum, mywindow):
+def makeNewThread(procnum, mywindow):
+    q = Queue()
+    p = Process(name="produce", target=producer, args=(q, ), daemon=True)
+    p.start()    
     app=QtWidgets.QApplication(sys.argv)
-    mywindow=main.MyWindow()     
+    mywindow=main.MyWindow(procnum, q)     
     app.exec()
 
+def producer(q):
+    proc = mp.current_process()
+    print(proc.name)
 
-result1, result2 = Pipe()
+    while True:
+        now = datetime.datetime.now()
+        data = str(now)
+        q.put(data)
+        time.sleep(1)
+
 if __name__ == "__main__":
+    action = 0
     mywindow = None
-    procnum = 1
-    procnum2 = 2
-    th1 = Process(target=mainthread, args=(procnum, mywindow))
+    procnum = 0
+
+    th1 = Process(target=makeNewThread, args=(procnum, mywindow))
     th1.start()
-    cam.startCam()
-    print(1)
+
+    # cam.startCam()
     
