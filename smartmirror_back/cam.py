@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 import time
 from time import sleep
+from multiprocessing import Queue, Process
+import multiprocessing as mp
 from os import path
 import os
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -185,11 +187,11 @@ def check_up(points):
             keep[3] = 0
             return show_result("r_down")
         
-    
-    
+#value 값 전달할 queue
+q = Queue()
 
-
-    
+def producer(q, value):
+    q.put(value) 
 
 def startCam():
     ###카메라랑 연결...?
@@ -201,7 +203,7 @@ def startCam():
     inputHeight=240
     inputScale=1.0/255
 
-    path = str(BASE_DIR).replace("back","front") + "/exefiles/"
+    path = str(BASE_DIR).replace("back","front") + "/exefiles0/"
     file_list = os.listdir(path)
     file_list_exe = [file for file in file_list if file.endswith(".exe")]        
 
@@ -278,17 +280,26 @@ def startCam():
         print(result)
         #print(path)
 
+    
         if result == 'A':
-            os.system(file_list_exe[0])
+            value = 0
+            p = Process(name="produce", target=producer, args=(q,value), daemon=True)
+            p.start()   
             sleep(1)
         elif result == 'B':
-            os.system(file_list_exe[1])
+            value = 1
+            p = Process(name="produce", target=producer, args=(q,value), daemon=True)
+            p.start()
             sleep(1)
         elif result == 'C':
-            os.system(file_list_exe[2])
+            value = 2
+            p = Process(name="produce", target=producer, args=(q,value), daemon=True)
+            p.start()
             sleep(1)
         elif result == 'D':
-            os.system(file_list_exe[3])
+            value = 3
+            p = Process(name="produce", target=producer, args=(q,value), daemon=True)
+            p.start()
             sleep(1)
 
             
