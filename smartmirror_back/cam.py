@@ -301,7 +301,9 @@ def startCam():
             p = Process(name="produce", target=producer, args=(q,value), daemon=True)
             p.start()
             sleep(1)
-
+        elif result == 'F': # 새로운 아이콘들의 화면으로 넘길 시
+            p.close()
+            
             
         ####### result 변수를 UI에 전달하면 어느정도 작동할 듯????
 
