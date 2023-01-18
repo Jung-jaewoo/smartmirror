@@ -1,31 +1,35 @@
 import webbrowser
 import sys
 import os
-#import ctypes
-from pathlib import Path
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot, QObject, pyqtSignal, QThread
-from PyQt5 import QtCore,QtGui,QtWidgets,uic
 from functools import partial
-BASE_DIR = Path(__file__).resolve().parent
+from pathlib import Path
+from PyQt5 import QtCore,QtGui,QtWidgets,uic
+from PyQt5.QtCore import pyqtSlot, QObject, pyqtSignal, QThread
+from PyQt5.QtWidgets import *
+CONST_PAGE_NUMBER = 2 #페이지 개수 
 
+
+BASE_DIR = Path(__file__).resolve().parent
 UI_class = uic.loadUiType(str(BASE_DIR) + "/desinger.ui")[0]
 
 #QMainWindow,QWidget
 #widget = QtWidgets.QStackedWidget()
 class MyWindow(QtWidgets.QMainWindow, UI_class):
-    def __init__(self,filesIndex,q):
+
+    def __init__(self,q,page):
         super().__init__()
+        self.page = page
         self.setupUi(self)
-        self.initUI(filesIndex)
+        self.q = q
+        self.initUI()
         self.customsignal = CustomSignal(q)
         self.customsignal.poped.connect(self.funcEmit)
         self.customsignal.start()
         self.show()
 
-    def initUI(self,filesIndex):
+    def initUI(self):
         self.setWindowTitle("파일 오픈")
-        self.exefiles = self.importfile(filesIndex)
+        self.exefiles = self.importfile(self.page)
         try:
             self.pushButton1.clicked.connect(partial(self.executeFile,exefiles[0]))
             self.pushButton2.clicked.connect(partial(self.executeFile,exefiles[1]))
@@ -34,7 +38,7 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
             
         except:
             pass
-        imagefiles = self.importfileImage(filesIndex)
+        imagefiles = self.importfileImage(self.page)
         try:
             self.pushButton1.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(filesIndex) + "/" + imagefiles[0] +'); border :0px;')
             self.pushButton2.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(filesIndex) + "/" + imagefiles[1] +'); border :0px;')
@@ -62,7 +66,6 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
 
     @pyqtSlot(int)
     def funcEmit(self, value):
-        self.executeFile(self.exefiles[0])
         if value == 0:
             self.executeFile(self.exefiles[0])
         if value == 1:
@@ -71,6 +74,12 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
             self.executeFile(self.exefiles[2])
         if value == 3:
             self.executeFile(self.exefiles[3])
+        if value == 4:  # 새로운 아이콘들의 화면으로 넘길 시
+            self.page = (self.page + 1) % CONST_PAGE_NUMBER
+            self.nextpage = MyWindow(self.q, self.page)
+            self.close()
+            
+
     # def fileopen(self):
     #     global filename
     #     filename = QtWidgets.QFileDialog.getOpenFileName(self, '')
