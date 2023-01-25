@@ -29,34 +29,34 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
 
     def initUI(self):
         self.setWindowTitle("파일 오픈")
-        self.exefiles = self.importfile(self.page)
+        self.exefiles = self.importfile()
         try:
-            self.pushButton1.clicked.connect(partial(self.executeFile,exefiles[0]))
-            self.pushButton2.clicked.connect(partial(self.executeFile,exefiles[1]))
-            self.pushButton3.clicked.connect(partial(self.executeFile,exefiles[2]))
-            self.pushButton4.clicked.connect(partial(self.executeFile,exefiles[3]))
+            self.pushButton1.clicked.connect(partial(self.executeFile,self.exefiles[0]))
+            self.pushButton2.clicked.connect(partial(self.executeFile,self.exefiles[1]))
+            self.pushButton3.clicked.connect(partial(self.executeFile,self.exefiles[2]))
+            self.pushButton4.clicked.connect(partial(self.executeFile,self.exefiles[3]))
             
         except:
             pass
-        imagefiles = self.importfileImage(self.page)
+        imagefiles = self.importfileImage()
         try:
-            self.pushButton1.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(filesIndex) + "/" + imagefiles[0] +'); border :0px;')
-            self.pushButton2.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(filesIndex) + "/" + imagefiles[1] +'); border :0px;')
-            self.pushButton3.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(filesIndex) + "/" + imagefiles[2] +'); border :0px;')
-            self.pushButton4.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(filesIndex) + "/" + imagefiles[3] +'); border :0px;')
+            self.pushButton1.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[0] +'); border :0px;')
+            self.pushButton2.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[1] +'); border :0px;')
+            self.pushButton3.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[2] +'); border :0px;')
+            self.pushButton4.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[3] +'); border :0px;')
         except:
             pass
         
 
     #현재 경로에 있는 exe파일 실행하는 함수
-    def importfile(self, filesIndex):
-        path = str(BASE_DIR) + "/exefiles" + str(filesIndex) + "/"
+    def importfile(self):
+        path = str(BASE_DIR) + "/exefiles" + str(self.page) + "/"
         file_list = os.listdir(path)
         file_list_exe = [file for file in file_list if file.endswith(".exe")]        
         return file_list_exe
 
-    def importfileImage(self, filesIndex):
-        path = str(BASE_DIR) + "/images" + str(filesIndex) + "/"
+    def importfileImage(self):
+        path = str(BASE_DIR) + "/images" + str(self.page) + "/"
         fileImage_list = os.listdir(path)
         fileImage_list_exe = [file for file in fileImage_list if file.endswith(".png")]        
         return fileImage_list_exe

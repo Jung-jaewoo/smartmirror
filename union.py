@@ -9,7 +9,7 @@ import smartmirror_back.cam as cam
 
 def makeNewThread(procnum, mywindow, q):
     app=QtWidgets.QApplication(sys.argv)
-    mywindow=main.MyWindow(procnum, q)     
+    mywindow=main.MyWindow(q, procnum)     
     app.exec()
 
 
@@ -17,9 +17,11 @@ if __name__ == "__main__":
     action = 0
     mywindow = None
     procnum = 0
-
+    
     th1 = Process(target=makeNewThread, args=(procnum, mywindow, cam.q))
     th1.start()
 
     cam.startCam()
     
+    
+

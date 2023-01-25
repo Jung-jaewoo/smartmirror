@@ -281,8 +281,8 @@ def startCam():
         #print(path)
 
     
-        if result == 'A':
-            value = 0
+        if result == 'A': 
+            value = 4
             p = Process(name="produce", target=producer, args=(q,value), daemon=True)
             p.start()   
             sleep(1)
