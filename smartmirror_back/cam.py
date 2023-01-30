@@ -1,10 +1,9 @@
 import cv2
 import sys
+from multiprocessing import Queue, Process
 from pathlib import Path
 import time
 from time import sleep
-from multiprocessing import Queue, Process
-import multiprocessing as mp
 from os import path
 import os
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -33,14 +32,10 @@ net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 # openCV의 좌표계는 좌측위가 (0,0)이다...
 # 아래/오른쪽으로 갈수록 증가한다
 
-
-max_time_end = time.time() + 3
-keep = [0,0,0,0]
+keep = [0,0,0,0,0]
 
 ##################################################
 # 자세 체크 함수들
-
-
 
 def check_right_up(points):
     while(True):
@@ -132,9 +127,70 @@ def check_left_down(points):
             return False
 
 
+def check_scroll(points):
+    while(True):
+        if points[4] and points[14]:
+            rw_x,rw_y=points[4] #오른쪽 손목
+            c_x,c_y = points[14] #흉부
+            
+            #흉부와 손목의 거리차가 10이하로 근접
+            if abs(c_x - rw_x) <= 30:
+                #흉부와 손목의 거리차가 10이하로 근접
+                if abs(c_y - rw_y) <= 30:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+            
+        else:
+            return False
+
 
 #################################################
 # 결과를 반환하는 함수
+
+def check_up(points):
+    lu = check_left_up(points)
+    ru = check_right_up(points)
+    ld = check_left_down(points)
+    rd = check_right_down(points)
+    sc = check_scroll(points)
+    
+    if lu:
+        keep[0] += 1
+        keep[1] = keep[2] = keep[3] = keep[4] = 0
+        if keep[0] > 10:
+            keep[0] = 0
+            return show_result("l_up")
+    if ru:
+        keep[1] += 1
+        keep[0] = keep[2] = keep[3] = keep[4] = 0
+        if keep[1] > 10:
+            keep[1] = 0
+            return show_result("r_up")
+        
+    if ld:
+        keep[2] += 1
+        keep[0] = keep[1] = keep[3] = keep[4] = 0
+        if keep[2] > 10:
+            keep[2] = 0
+            return show_result("l_down")
+        
+    if rd:
+        keep[3] += 1
+        keep[0] = keep[1] = keep[2] = keep[4] = 0
+        if keep[3] > 10:
+            keep[3] = 0
+            return show_result("r_down")
+    
+    if sc:
+        keep[4] += 1
+        keep[0] = keep[1] = keep[2] = keep[3] = 0
+        if keep[4] > 10:
+            keep[4] = 0
+            return show_result("scroll")
+        
 
 def show_result(pose_type): #END/Again
     if pose_type=="l_up":
@@ -149,44 +205,15 @@ def show_result(pose_type): #END/Again
     elif pose_type == "r_down":
         print("오른쪽 아래")
         return "D"
+    elif pose_type == "scroll":
+        print("화면 넘기기")
+        return "E"
     else:
         print("자세를 취해주세요.") 
         return "Again"
 
 
-def check_up(points):
-    lu = check_left_up(points)
-    ru = check_right_up(points)
-    ld = check_left_down(points)
-    rd = check_right_down(points)
     
-    if lu:
-        keep[0] += 1
-        keep[1] = keep[2] = keep[3] = 0
-        if keep[0] > 10:
-            keep[0] = 0
-            return show_result("l_up")
-    if ru:
-        keep[1] += 1
-        keep[0] = keep[2] = keep[3] = 0
-        if keep[1] > 10:
-            keep[1] = 0
-            return show_result("r_up")
-        
-    if ld:
-        keep[2] += 1
-        keep[0] = keep[1] = keep[3] = 0
-        if keep[2] > 10:
-            keep[2] = 0
-            return show_result("l_down")
-        
-    if rd:
-        keep[3] += 1
-        keep[0] = keep[1] = keep[2] = 0
-        if keep[3] > 10:
-            keep[3] = 0
-            return show_result("r_down")
-        
 #value 값 전달할 queue
 q = Queue()
 
@@ -196,21 +223,32 @@ def producer(q, value):
 def startCam():
     ###카메라랑 연결...?
     capture = cv2.VideoCapture(0) #카메라 정보 받아옴
-    # capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640) #카메라 속성 설정
-    # capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480) # width:너비, height: 높이
+    capture.set(cv2.CAP_PROP_FRAME_WIDTH, 320) #카메라 속성 설정
+    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 640) # width:너비, height: 높이
+    fgbg = cv2.createBackgroundSubtractorMOG2()
 
+    prevTime = 0
+    
     inputWidth=320
     inputHeight=240
-    inputScale=1.0/255
+    inputScale=1.0/255     
 
-    path = str(BASE_DIR).replace("back","front") + "/exefiles0/"
-    file_list = os.listdir(path)
-    file_list_exe = [file for file in file_list if file.endswith(".exe")]        
+    def MOG(frame):
+        fgmask = fgbg.apply(frame)
+        _,fgmask = cv2.threshold(fgmask, 175, 255, cv2.THRESH_BINARY)
+        results = cv2.findContours(
+        fgmask , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
+        for contour in results[0]:
+            x,y,w,h = cv2.boundingRect(contour)
+            cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+    
     #반복문을 통해 카메라에서 프레임을 지속적으로 받아옴
     while cv2.waitKey(1) <0:  #아무 키나 누르면 끝난다.
         #웹캠으로부터 영상 가져옴
         hasFrame, frame = capture.read()  
+        
+        curTime = time.time()
         
         #영상이 커서 느리면 사이즈를 줄이자
         #frame=cv2.resize(frame,dsize=(320,240),interpolation=cv2.INTER_AREA)
@@ -234,7 +272,7 @@ def startCam():
 
         # 결과 받아오기
         output = net.forward()
-
+        MOG(frame)
 
         # 키포인트 검출시 이미지에 그려줌
         points = []
@@ -270,19 +308,22 @@ def startCam():
             if points[partA] and points[partB]:
                 cv2.line(frame, points[partA], points[partB], (0, 255, 0), 2)
         
-                
+        sec = curTime - prevTime
+        prevTime = curTime
+        fps = 1/sec
+        text = "FPS : %0.1f" % fps
+        0
+        cv2.putText(frame, text, (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
         cv2.imshow("Output-Keypoints",frame)
-        
-    
+                
         ####################################################################    위는 기본적인 카메라 출력
         
         result = check_up(points)
         print(result)
         #print(path)
 
-    
-        if result == 'A': 
-            value = 4
+        if result == 'A':
+            value = 0
             p = Process(name="produce", target=producer, args=(q,value), daemon=True)
             p.start()   
             sleep(1)
@@ -301,9 +342,11 @@ def startCam():
             p = Process(name="produce", target=producer, args=(q,value), daemon=True)
             p.start()
             sleep(1)
-        elif result == 'F': # 새로운 아이콘들의 화면으로 넘길 시
-            p.close()
-            
+        elif result == 'E':
+            value = 4
+            p = Process(name="produce", target=producer, args=(q,value), daemon=True)
+            p.start()
+            sleep(1)
             
         ####### result 변수를 UI에 전달하면 어느정도 작동할 듯????
 
