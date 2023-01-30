@@ -19,8 +19,8 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
     def __init__(self,q,page):
         super().__init__()
         self.page = page
-        self.setupUi(self)
         self.q = q
+        self.setupUi(self)
         self.initUI()
         self.customsignal = CustomSignal(q)
         self.customsignal.poped.connect(self.funcEmit)
@@ -31,19 +31,19 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
         self.setWindowTitle("파일 오픈")
         self.exefiles = self.importfile()
         try:
-            self.pushButton1.clicked.connect(partial(self.executeFile,self.exefiles[0]))
-            self.pushButton2.clicked.connect(partial(self.executeFile,self.exefiles[1]))
-            self.pushButton3.clicked.connect(partial(self.executeFile,self.exefiles[2]))
-            self.pushButton4.clicked.connect(partial(self.executeFile,self.exefiles[3]))
+            self.pushButton0.clicked.connect(partial(self.executeFile,self.exefiles[0]))
+            self.pushButton1.clicked.connect(partial(self.executeFile,self.exefiles[1]))
+            self.pushButton2.clicked.connect(partial(self.executeFile,self.exefiles[2]))
+            self.pushButton3.clicked.connect(partial(self.executeFile,self.exefiles[3]))
             
         except:
             pass
         imagefiles = self.importfileImage()
         try:
-            self.pushButton1.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[0] +'); border :0px;')
-            self.pushButton2.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[1] +'); border :0px;')
-            self.pushButton3.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[2] +'); border :0px;')
-            self.pushButton4.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[3] +'); border :0px;')
+            self.pushButton0.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[0] +'); border :0px;')
+            self.pushButton1.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[1] +'); border :0px;')
+            self.pushButton2.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[2] +'); border :0px;')
+            self.pushButton3.setStyleSheet('border-image:url('+ str(BASE_DIR).replace('\\', '/') + '/images' + str(self.page) + "/" + imagefiles[3] +'); border :0px;')
         except:
             pass
         
@@ -68,13 +68,13 @@ class MyWindow(QtWidgets.QMainWindow, UI_class):
     def funcEmit(self, value):
         if value == 0:
             self.executeFile(self.exefiles[0])
-        if value == 1:
+        elif value == 1:
             self.executeFile(self.exefiles[1])
-        if value == 2:
+        elif value == 2:
             self.executeFile(self.exefiles[2])
-        if value == 3:
+        elif value == 3:
             self.executeFile(self.exefiles[3])
-        if value == 4:  # 새로운 아이콘들의 화면으로 넘길 시
+        elif value == 4:  # 새로운 아이콘들의 화면으로 넘길 시
             self.page = (self.page + 1) % CONST_PAGE_NUMBER
             self.nextpage = MyWindow(self.q, self.page)
             self.close()
