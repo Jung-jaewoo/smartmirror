@@ -43,7 +43,7 @@
   <widget class="QPushButton" name="pushButton2">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>250</x>
      <y>840</y>
      <width>200</width>
      <height>170</height>
@@ -92,28 +92,26 @@ color: rgb(255,255,255);
     <string/>
    </property>
   </widget>
-  <widget class="QTextBrowser" name="textBrowser">
+  <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>280</y>
-     <width>331</width>
-     <height>71</height>
+     <x>400</x>
+     <y>340</y>
+     <width>301</width>
+     <height>51</height>
     </rect>
    </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <weight>75</weight>
+     <italic>true</italic>
+     <bold>true</bold>
+     <kerning>false</kerning>
+    </font>
    </property>
-   <property name="styleSheet">
-    <string notr="true">background:transparent;
-font: 75 48pt &quot;Arial&quot;;</string>
-   </property>
-   <property name="html">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Arial'; font-size:48pt; font-weight:72; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.AppleSystemUIFont'; font-weight:600; color:#0096ff;&quot;&gt;Smart Mirror&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:48pt; font-weight:600; color:#0096ff;&quot;&gt;Smart Mirror&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>
